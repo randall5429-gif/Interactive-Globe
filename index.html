@@ -4,8 +4,17 @@
   <meta charset="UTF-8">
   <title>Interactive Globe</title>
   <style>
-    body { margin: 0; overflow: hidden; background: #05070b; }
-    canvas { display: block; }
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #05070b;
+      touch-action: none;
+      overscroll-behavior: none;
+    }
+    canvas {
+      display: block;
+      touch-action: none;
+    }
     #tooltip {
       position: fixed;
       left: 0;

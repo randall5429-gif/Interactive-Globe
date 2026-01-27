@@ -356,6 +356,11 @@ controls.enablePan = false;
 controls.minDistance = 1.6;
 controls.maxDistance = 4.5;
 controls.autoRotate = false;
+controls.rotateSpeed = 0.7;
+controls.zoomSpeed = 0.9;
+controls.enableDamping = true;
+controls.touches.ONE = THREE.TOUCH.ROTATE;
+controls.touches.TWO = THREE.TOUCH.DOLLY;
 
 // Country borders
 function latLonToVector3(lat, lon, radius = 1.002) {
