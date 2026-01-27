@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Interactive Globe</title>
+  <style>
+    body { margin: 0; overflow: hidden; background: #05070b; }
+    canvas { display: block; }
+    #tooltip {
+      position: fixed;
+      left: 0;
+      top: 0;
+      transform: translate(12px, 12px);
+      padding: 8px 10px;
+      background: rgba(10, 14, 22, 0.92);
+      color: #e8f0ff;
+      border: 1px solid rgba(120, 170, 255, 0.35);
+      border-radius: 8px;
+      font: 12px/1.4 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      pointer-events: none;
+      display: none;
+      white-space: nowrap;
+      z-index: 10;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+    #country-panel {
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      width: min(320px, 38vw);
+      max-height: min(46vh, 420px);
+      overflow: auto;
+      padding: 12px 14px;
+      background: rgba(10, 14, 22, 0.94);
+      color: #e8f0ff;
+      border: 1px solid rgba(120, 170, 255, 0.35);
+      border-radius: 10px;
+      font: 13px/1.5 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      display: none;
+      z-index: 20;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+    }
+    #country-panel h3 {
+      margin: 0 0 6px 0;
+      font-size: 15px;
+    }
+    #country-panel p {
+      margin: 0;
+      opacity: 0.95;
+    }
+  </style>
+</head>
+<body>
+
+<div id="tooltip"></div>
+<div id="country-panel" aria-live="polite"></div>
+
+<script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.158.0/build/three.module.js"
+    }
+  }
+</script>
+<script type="module" src="./main.js"></script>
+
+</body>
+</html>
