@@ -361,6 +361,190 @@ controls.zoomSpeed = 0.9;
 controls.enableDamping = true;
 controls.touches.ONE = THREE.TOUCH.ROTATE;
 controls.touches.TWO = THREE.TOUCH.DOLLY;
+controls.enableZoom = true;
+controls.target.set(0, 0, 0);
+
+// Zoom buttons
+const zoomInBtn = document.getElementById("zoom-in");
+const zoomOutBtn = document.getElementById("zoom-out");
+const zoomStep = 0.6;
+const zoomScale = 1.2;
+
+function clampZoom(distance) {
+  return THREE.MathUtils.clamp(distance, controls.minDistance, controls.maxDistance);
+}
+
+function applyZoom(delta) {
+  if (controls.dollyIn && controls.dollyOut) {
+    if (delta < 0) {
+      controls.dollyIn(zoomScale);
+    } else {
+      controls.dollyOut(zoomScale);
+    }
+    controls.update();
+    return;
+  }
+
+  const direction = new THREE.Vector3();
+  direction.copy(camera.position).sub(controls.target).normalize();
+  const distance = camera.position.distanceTo(controls.target);
+  const nextDistance = clampZoom(distance + delta);
+  camera.position.copy(controls.target).add(direction.multiplyScalar(nextDistance));
+  controls.update();
+}
+
+function stopPropagation(event) {
+  event.stopPropagation();
+}
+
+zoomInBtn?.addEventListener("click", event => {
+  stopPropagation(event);
+  applyZoom(-zoomStep);
+});
+zoomOutBtn?.addEventListener("click", event => {
+  stopPropagation(event);
+  applyZoom(zoomStep);
+});
+
+// Player
+const trackTitleEl = document.getElementById("track-title");
+const trackArtistEl = document.getElementById("track-artist");
+const timeCurrentEl = document.getElementById("time-current");
+const timeDurationEl = document.getElementById("time-duration");
+const seekEl = document.getElementById("track-seek");
+const playBtn = document.getElementById("track-play");
+const nextBtn = document.getElementById("track-next");
+const prevBtn = document.getElementById("track-prev");
+
+const audio = new Audio();
+audio.preload = "auto";
+audio.volume = 0.1;
+
+const tracks = [
+  { artist: "AERØHEAD", title: "Giving Away", src: "./assets/song/AERØHEAD - Giving Away.mp3" },
+  { artist: "Devyzed & Ghostrifter", title: "Travelers", src: "./assets/song/Devyzed & Ghostrifter - Travelers_fixed2.mp3" },
+  { artist: "Hayden Folker", title: "Adrift", src: "./assets/song/Hayden Folker - Adrift_fixed2.mp3" },
+  { artist: "Punch Deck", title: "Spacewalk", src: "./assets/song/Punch Deck - Spacewalk_fixed2.mp3" },
+  { artist: "Rexlambo", title: "Under The Stars", src: "./assets/song/Rexlambo - Under The Stars.mp3" }
+];
+
+let currentIndex = 0;
+let isSeeking = false;
+
+function formatTime(seconds) {
+  if (!Number.isFinite(seconds)) return "0:00";
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m}:${String(s).padStart(2, "0")}`;
+}
+
+function updateTrackUI() {
+  const track = tracks[currentIndex];
+  if (trackTitleEl) trackTitleEl.textContent = track.title;
+  if (trackArtistEl) trackArtistEl.textContent = track.artist;
+}
+
+function loadTrack(index, autoplay = false) {
+  const safeIndex = ((index % tracks.length) + tracks.length) % tracks.length;
+  currentIndex = safeIndex;
+  const track = tracks[safeIndex];
+  audio.src = track.src;
+  audio.load();
+  updateTrackUI();
+  isSeeking = false;
+  if (seekEl) seekEl.value = "0";
+  if (timeCurrentEl) timeCurrentEl.textContent = "0:00";
+  if (timeDurationEl) timeDurationEl.textContent = "0:00";
+  if (autoplay) {
+    audio.play().catch(() => {});
+  }
+  if (playBtn) playBtn.textContent = autoplay ? "||" : ">";
+}
+
+function togglePlay() {
+  if (!audio.src) {
+    loadTrack(currentIndex, true);
+    return;
+  }
+  if (audio.paused) {
+    audio.play().catch(() => {});
+    if (playBtn) playBtn.textContent = "||";
+  } else {
+    audio.pause();
+    if (playBtn) playBtn.textContent = ">";
+  }
+}
+
+function nextTrack() {
+  loadTrack(currentIndex + 1, true);
+}
+
+function prevTrack() {
+  loadTrack(currentIndex - 1, true);
+}
+
+function setSeekFromAudio() {
+  if (!seekEl || isSeeking) return;
+  const duration = audio.duration || 0;
+  const current = audio.currentTime || 0;
+  seekEl.value = duration ? String((current / duration) * 100) : "0";
+  if (timeCurrentEl) timeCurrentEl.textContent = formatTime(current);
+  if (timeDurationEl) timeDurationEl.textContent = formatTime(duration);
+}
+
+function setAudioFromSeek() {
+  if (!seekEl) return;
+  const duration = audio.duration || 0;
+  if (!duration) return;
+  const value = Number(seekEl.value) / 100;
+  audio.currentTime = duration * value;
+}
+
+
+playBtn?.addEventListener("click", event => {
+  stopPropagation(event);
+  togglePlay();
+});
+
+nextBtn?.addEventListener("click", event => {
+  stopPropagation(event);
+  nextTrack();
+});
+
+prevBtn?.addEventListener("click", event => {
+  stopPropagation(event);
+  prevTrack();
+});
+
+seekEl?.addEventListener("input", () => {
+  isSeeking = true;
+  setAudioFromSeek();
+});
+seekEl?.addEventListener("change", () => {
+  isSeeking = false;
+  setAudioFromSeek();
+});
+
+audio.addEventListener("timeupdate", setSeekFromAudio);
+audio.addEventListener("loadedmetadata", setSeekFromAudio);
+audio.addEventListener("durationchange", setSeekFromAudio);
+audio.addEventListener("canplay", setSeekFromAudio);
+audio.addEventListener("loadedmetadata", () => {
+  // Workaround for MP3s that report Infinity duration until forced.
+  if (!Number.isFinite(audio.duration)) {
+    audio.currentTime = 1e101;
+  }
+});
+audio.addEventListener("durationchange", () => {
+  if (Number.isFinite(audio.duration) && audio.currentTime > 1e50) {
+    audio.currentTime = 0;
+  }
+});
+audio.addEventListener("ended", () => {
+  nextTrack();
+});
+
+loadTrack(0, false);
 
 // Country borders
 function latLonToVector3(lat, lon, radius = 1.002) {

@@ -14,6 +14,9 @@
     canvas {
       display: block;
       touch-action: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1;
     }
     #tooltip {
       position: fixed;
@@ -46,7 +49,7 @@
       border-radius: 10px;
       font: 13px/1.5 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
       display: none;
-      z-index: 20;
+      z-index: 30;
       box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
     }
     #country-panel h3 {
@@ -57,12 +60,126 @@
       margin: 0;
       opacity: 0.95;
     }
+    #player {
+      position: fixed;
+      left: 12px;
+      top: 12px;
+      width: min(320px, 42vw);
+      padding: 14px 16px;
+      background: rgba(12, 16, 24, 0.94);
+      color: #e8f0ff;
+      border: 2px solid rgba(255, 255, 255, 0.7);
+      border-radius: 16px;
+      font: 12px/1.4 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      z-index: 30;
+    }
+    #player h4 {
+      margin: 0;
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    #player .artist {
+      margin-top: 2px;
+      font-size: 11px;
+      opacity: 0.85;
+    }
+    #player .timeline {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 8px;
+      align-items: center;
+      margin: 10px 0 12px 0;
+      font-variant-numeric: tabular-nums;
+    }
+    #player input[type="range"] {
+      width: 100%;
+      accent-color: #ffffff;
+    }
+    #player .controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+    #player button {
+      background: transparent;
+      color: inherit;
+      border: 0;
+      cursor: pointer;
+      padding: 6px 8px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    #player .nav {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    #player button.active {
+      color: #9bd0ff;
+    }
+    #player .play {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.9);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+    #zoom-controls {
+      position: fixed;
+      right: 12px;
+      bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      z-index: 40;
+      pointer-events: auto;
+    }
+    #zoom-controls * {
+      pointer-events: auto;
+    }
+    #zoom-controls button {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      border: 1px solid rgba(120, 170, 255, 0.35);
+      background: rgba(10, 14, 22, 0.92);
+      color: #e8f0ff;
+      font-size: 18px;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+    }
+    #zoom-controls button:active {
+      transform: translateY(1px);
+    }
   </style>
 </head>
 <body>
 
 <div id="tooltip"></div>
 <div id="country-panel" aria-live="polite"></div>
+<div id="player" aria-label="Music player">
+  <h4 id="track-title">Song Title</h4>
+  <div class="artist" id="track-artist">Artist Name</div>
+  <div class="timeline">
+    <span id="time-current">0:00</span>
+    <input id="track-seek" type="range" min="0" max="100" value="0" aria-label="Seek" />
+    <span id="time-duration">0:00</span>
+  </div>
+  <div class="controls">
+    <button id="track-prev" class="nav" aria-label="Previous track">&lt;&lt;</button>
+    <button id="track-play" class="play" aria-label="Play or pause">&gt;</button>
+    <button id="track-next" class="nav" aria-label="Next track">&gt;&gt;</button>
+  </div>
+</div>
+<div id="zoom-controls">
+  <button id="zoom-in" aria-label="Zoom in">+</button>
+  <button id="zoom-out" aria-label="Zoom out">-</button>
+</div>
 
 <script type="importmap">
   {
